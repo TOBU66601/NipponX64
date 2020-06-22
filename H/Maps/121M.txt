@@ -1,0 +1,20 @@
+BveTs Map 2.02:UTF-8
+
+#シナリオ：テスト段階：　本運用：
+#マップファイル最上位：121M.txt
+
+#読込ファイル	(.Load)
+	Structure.Load	('..\Structures.csv');#	ストラクチャーリストファイル
+	
+    #Signal.Load		('Signals.csv');				
+    #	信号現示リストファイル
+	#Sound.Load		('3793F\Sounds.csv');			
+    #	サウンドリストファイル
+	#Sound3D.Load	('3793F\Sounds3D.csv');			
+    #	サウンド3Dリストファイル
+	#Station.Load	('3793F\Stations.csv');			
+    #	停車場リストファイル
+
+Section.SetSpeedLimit	( 0, 25, 45, 65, 130);
+#DATCの最高は普通130/特140。
+
