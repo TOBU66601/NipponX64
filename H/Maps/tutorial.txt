@@ -1,0 +1,369 @@
+BveTs Map 2.02:UTF-8
+
+/////	マップファイルの編集には"Notepad++"や"Visual Studio Code"といったソースコードエディタ"に,マップ構文定義ファイルを適用すると見やすく編集しやすいでしょう.
+/////	1行目には,必ずファイルヘッダーを記述します.うまく読み込まれないときは,全角文字(特に,スペースなど見えない文字に注意！)や,ファイルヘッダーのバージョンと文字エンコードもチェックしましょう.
+/////	キロ程には自由な数が設定できるようになりました.しかし,調査や計算が複雑になるため,設計としては25m単位にするなど,丸めて製作することも重要な工夫です. (当区間では5m単位に丸めています)
+
+/////	このファイルではシナリオを構成するために, 使用するファイルの選択を集中管理するような製作方法を取っています.
+/////	いろいろな製作方法が取れるようになっただけであり, 従来と同じようなキロ程順での作り方でも製作可能です. 製作者本人が見やすく, 管理しやすいように整理することが大事です.
+
+/////	シナリオファイルは,		Uchibo_3793F_ATS-P.txt
+/////	マップファイルの最上位は,	3793F_P.txt	(このファイル)
+
+/////	[ キロ程表記について ]	:	詳細は Track_define.txt
+/////	$SR01 をキロ程に使う場合, シナリオ上のキロ程は	[ 入力したキロ程 +39440 ]
+/////	$WK01 をキロ程に使う場合, シナリオ上のキロ程は	[ 入力したキロ程 +  235 ]
+/////	$WK02 をキロ程に使う場合, シナリオ上のキロ程は	[ 入力したキロ程 -  145 ]
+/////	$SZ01 をキロ程に使う場合, シナリオ上のキロ程は	[ 入力したキロ程 + 4025 ]
+
+
+#	基本的な読み込みファイル	(.Load)
+	Structure.Load	('..\Structures.csv');			
+    #	ストラクチャーリストファイル
+	Signal.Load		('Signals.csv');				
+    #	信号現示リストファイル
+	Sound.Load		('3793F\Sounds.csv');			
+    #	サウンドリストファイル
+	Sound3D.Load	('3793F\Sounds3D.csv');			
+    #	サウンド3Dリストファイル
+	Station.Load	('3793F\Stations.csv');			
+    #	停車場リストファイル
+
+#
+#	Section.SetSpeedLimit	( 0, 25, 45, 65, 95);						
+#	通常はSection(0～4)までの制限速度を指定します
+	
+    Section.SetSpeedLimit	( 0, 25, 45, 65, 95, 25, 55, 75,110);		
+    #	蘇我駅を境に信号の制限速度が変わるため,特殊な設定をしています (プラグインが対応しているか要確認 / 信号定義ファイルの設定も必要です)
+
+	#	0 : R
+	#	1 : YY ( 25)	/	5: YY ( 25)
+	#	2 : Y  ( 45)	/	6: Y  ( 55)
+	#	3 : YG ( 65)	/	7: YG ( 75)
+	#	4 : G  ( 95)	/	8: G  (110)
+
+	Light.Direction(  70,  215 );					#	平行光が差す方向
+	Light.Diffuse( 0.4500, 0.4500, 0.4500 );		#	平行光の色
+	Light.Ambient( 0.6250, 0.6250, 0.6250 );		#	環境光の色
+
+
+
+#	!!!	include構文を使用する場合, ファイルが読み込まれる位置・順番も留意しましょう.
+#	!!!	例えば, 変数を使用したい場合は先に変数宣言を行ったファイルを読み込まないとエラーが出ます.	(変数宣言前となります)
+#	!!!	例えば, 同一キロ程でも Section と Signal を書き分けた場合, 読み込まれる順番によって, 対となるセクションが変わります(読み込ませる順番が,構文設定した順番になります).
+
+	include 	'Track_define.txt';									
+    #	自軌道・他軌道の基本的な設定や キロ程関連の変数定義
+	
+    include 	'Map_RunIndexDefine_E217r.txt';						
+    #	Run音 インデックス定義	： E217系		/	走行音用の変数を使用する前に 変数宣言を行います
+
+	#	[ 保安装置別ファイル ]	：	信号・保安装置に関連する構文を, 別ファイルとしています
+	include 	'Section_ATS-P.txt';								#	ATS-P形		
+#		include 	'Section_ATS-P_03_SogaArr2_5.txt';				#	蘇我	場内		： 5番線				○：どちらかを選択
+		include 	'Section_ATS-P_03_SogaArr2_6.txt';				#	蘇我	場内		： 6番線				○：どちらかを選択
+#		include 	'Section_ATS-P_03_SogaDep_5-Uchibo.txt';		#	蘇我	出発		： 5番線 → 内房線		◇：どちらかを選択
+		include 	'Section_ATS-P_03_SogaDep_6-Uchibo.txt';		#	蘇我	出発		： 6番線 → 内房線		◇：どちらかを選択
+
+	#	[ 路線ファイル ]	：	シナリオの中心となる路線データのファイルです.
+	#着発線の入替や,作例としてちょっとした配線部分を確認できるように細かくファイルを分けていますが,
+	#作り分ける基準はデータに合わせて設定するとよいでしょう.
+	
+    include 	'Map_Chiba-Soga.txt';								#	千葉 - 蘇我
+	include 		'Map01_Chiba_4.txt';							#	千葉駅	4番線
+	include 		'Map02_HonChiba.txt';							#	本千葉駅		： 複線間隔が広がる配線の作り方の例
+	include 		'Map_KDK.txt';									#	京成線		: キロ程順に記述した例
+	include 		'Map03_Soga_cross.txt';							#	蘇我駅	(北)立体交差
+	include 		'Map_RwSite_Soga.txt';							#	蘇我駅		： 敷地内拡張 (フェンスや敷地内の緑の表現など)
+#		include			'Map03_Soga_5.txt';							#	蘇我駅	5番線								○：どちらかを選択
+#		include 		'Map03_Soga_5-Uchibo.txt';					#	蘇我駅		(南)シーサス	： 5番線 → 内房線			◇：どちらかを選択
+		include			'Map03_Soga_6.txt';							#	蘇我駅	6番線								○：どちらかを選択	
+		include		 	'Map03_Soga_6-Uchibo.txt';					#	蘇我駅		(南)シーサス	： 6番線 → 内房線			□：どちらかを選択
+	include 		'Map03_Soga_Uchibo.txt';						#	蘇我駅	(南)内房線
+	include 		'Map03_F-Depot.txt';							#	千葉機関区
+
+	include 	'Map_Uchibo.txt';									#	内房線	蘇我以遠
+	include 		'Map_RwSite_Uchibo.txt';						#	内房線		： 敷地内拡張 (フェンスや敷地内の緑の表現など)	
+	include 		'Map04_Hamano.txt';								#	浜野駅		： 複線間隔が広がる配線の作り方の例
+	include 		'Map04_MurataRiv.txt';							#	村田川橋梁	： 複線間隔が広がる配線の作り方の例
+	include 		'Map05_Yawatajuku.txt';							#	八幡宿駅		： 複線間隔が広がる配線の作り方の例
+
+	include 	'Map_RunIndex.txt';									#	走行音の設定
+	include 	'Irregularity.txt';									#	軌道変位の設定
+	include 	'CabIlluminance.txt';								#	運転台明るさ設定
+	include 	'Map_station.txt';									#	駅ストラクチャの設定
+
+																	#	[ 列車別ファイル ]	：	再現列車専用の設定が必要な構文を, 別ファイルとしています
+	include 	'Fog_0.txt';										#	霧効果や粘着特性の設定
+	include 	'Stop_15.txt';										#	停止位置・停目	(15両編成用) 
+	include 	'3793F\Announce.txt';								#	車内放送
+	include		'3793F\3793F_MON.txt';								#	MON設定	(地上側)
+	include 	'3793F\PreTrain_0.txt';								#	先行列車
+	include 	'3793F\AddTrain_0.txt';								#	他列車
+	include 	'3793F\Passengers.txt';								#	駅ホームの乗客ストラクチャの設定
+	include 	'3793F\Switch_01_Chiba.txt';						#	分岐器設定 (開通方向の選択)	：	千葉
+	include 	'3793F\Switch_03_Soga.txt';							#	分岐器設定 (開通方向の選択)	：	蘇我
+
+
+
+#   ↓	ここの # を入れ替え, どちらかを選択します.		 	
+
+#	[ 描画距離の選択 ]	：	ここで選択した影響は, 蘇我駅周辺のみに現れます. 全体的な描画距離の設定は プレイ中の[設定]ウィンドウより行ってください.
+		include 	'DrawDistance_0.txt';								#	描画距離制限の設定	/	蘇我駅での動作が重い環境向け		(蘇我駅での描画距離制限：短め)
+	#	include 	'DrawDistance_1.txt';								#	描画距離制限の設定	/	蘇我駅での動作に余裕のある環境向け	(蘇我駅での描画距離制限：長め)
+
+
+
+    BveTs Map 2.02:UTF-8
+
+/////	シナリオファイルは,		Uchibo_3793F_ATS-P.txt
+/////	マップファイルの最上位は,	3793F_P.txt
+
+	0;
+
+#	[ 軌道に関する設定 ]
+
+#	!!!	・軌間 を設定する構文
+#	!!!		[自軌道]	Curve.SetGauge(gauge)
+#	!!!		[他軌道]	Track[trackKey].Cant.SetGauge(gauge)
+#	!!!								gauge	: 軌間 [m]
+#	!!!								trackKey: 軌道名 (任意の文字列)
+#	!!!	現在の距離程以降の軌間を設定します. この値は, カントを角度に換算するために使用します.
+
+#	!!!	・カントの回転中心 を設定する構文
+#	!!!		[自軌道]	Curve.SetCenter(x) 
+#	!!!		[他軌道]	Track[trackKey].Cant.SetCenter(x) 
+#	!!!								x		: 回転中心の x 座標 [m] (正: 曲線の内側, 負: 曲線の外側)
+#	!!!								trackKey: 軌道名 (任意の文字列)
+#	!!!	
+#	!!!	現在の距離程以降のカントの回転中心位置を設定します.
+#	!!!	在来線では外軌持ち上げ, 新幹線では軌道中心回転としているようです.
+#	!!!	ただし,在来線でも反向曲線については軌道中心回転となります.
+
+#	!!!	・カント逓減関数 を設定する構文
+#	!!!		[自軌道]	Curve.SetFunction(id)
+#	!!!		[他軌道]	Track[trackKey].Cant.SetFunction(id) 
+#	!!!								id		: 関数番号 (0: サイン半波長逓減, 1: 直線逓減)
+#	!!!								trackKey: 軌道名 (任意の文字列)
+#	!!!
+#	!!!	現在の距離程以降の緩和曲線関数を設定します.
+#	!!!
+#	!!!	在来線では直線逓減, 新幹線ではサイン半波長逓減が使われます.
+#	!!!	ただし, 在来線でも全緩和曲線・反向曲線の箇所ではサイン半波長逓減が使用されるほか, 在来線でも高速路線などではサイン半波長逓減などの曲線逓減を使用することがあるようです.
+
+	Curve.SetGauge(1067/1000);								Curve.SetCenter(1067/2000);								Curve.SetFunction(1);
+	Track['D-Sazanami'	].Cant.SetGauge(1067/1000);			Track['D-Sazanami'	].Cant.SetCenter(1067/2000);		Track['D-Sazanami'	].Cant.SetFunction(1);
+	Track['U-Sazanami'	].Cant.SetGauge(1067/1000);			Track['U-Sazanami'	].Cant.SetCenter(1067/2000);		Track['U-Sazanami'	].Cant.SetFunction(1);
+
+	Track['D-Wakashio'	].Cant.SetGauge(1067/1000);			Track['D-Wakashio'	].Cant.SetCenter(1067/2000);		Track['D-Wakashio'	].Cant.SetFunction(1);
+	Track['U-Wakashio'	].Cant.SetGauge(1067/1000);			Track['U-Wakashio'	].Cant.SetCenter(1067/2000);		Track['U-Wakashio'	].Cant.SetFunction(1);
+
+
+	Track['SobuLoc-1'	].Cant.SetGauge(1067/1000);			Track['SobuLoc-1'	].Cant.SetCenter(1067/2000);		Track['SobuLoc-1'	].Cant.SetFunction(1);
+	Track['SobuLoc-2'	].Cant.SetGauge(1067/1000);			Track['SobuLoc-2'	].Cant.SetCenter(1067/2000);		Track['SobuLoc-2'	].Cant.SetFunction(1);
+
+	Track['D-SobuRpd'	].Cant.SetGauge(1067/1000);			Track['D-SobuRpd'	].Cant.SetCenter(1067/2000);		Track['D-SobuRpd'	].Cant.SetFunction(1);
+	Track['U-SobuRpd'	].Cant.SetGauge(1067/1000);			Track['U-SobuRpd'	].Cant.SetCenter(1067/2000);		Track['U-SobuRpd'	].Cant.SetFunction(1);
+
+	Track['Keiyo-3'		].Cant.SetGauge(1067/1000);			Track['Keiyo-3'		].Cant.SetCenter(1067/2000);		Track['Keiyo-3'		].Cant.SetFunction(1);
+	Track['Keiyo-4'		].Cant.SetGauge(1067/1000);			Track['Keiyo-4'		].Cant.SetCenter(1067/2000);		Track['Keiyo-4'		].Cant.SetFunction(1);
+
+
+	Track['KDK-U'		].Cant.SetGauge(1435/1000);			Track['KDK-U'		].Cant.SetCenter(1435/2000);		Track['KDK-U'		].Cant.SetFunction(1);
+	Track['KDK-D'		].Cant.SetGauge(1435/1000);			Track['KDK-D'		].Cant.SetCenter(1435/2000);		Track['KDK-D'		].Cant.SetFunction(1);
+
+#	他列車用
+	Track['D-Sazanami-3'].Cant.SetGauge(1067/1000);			Track['D-Sazanami-3'].Cant.SetCenter(1067/2000);		Track['D-Sazanami-3'].Cant.SetFunction(1);
+	Track['U-Sazanami-4'].Cant.SetGauge(1067/1000);			Track['U-Sazanami-4'].Cant.SetCenter(1067/2000);		Track['U-Sazanami-4'].Cant.SetFunction(1);
+	Track['D-Wakashio-5'].Cant.SetGauge(1067/1000);			Track['D-Wakashio-5'].Cant.SetCenter(1067/2000);		Track['D-Wakashio-5'].Cant.SetFunction(1);
+	Track['U-Wakashio-6'].Cant.SetGauge(1067/1000);			Track['U-Wakashio-6'].Cant.SetCenter(1067/2000);		Track['U-Wakashio-6'].Cant.SetFunction(1);
+	Track['D-KY-Sotobo'	].Cant.SetGauge(1067/1000);			Track['D-KY-Sotobo'	].Cant.SetCenter(1067/2000);		Track['D-KY-Sotobo'	].Cant.SetFunction(1);
+	Track['U-KY-Sotobo'	].Cant.SetGauge(1067/1000);			Track['U-KY-Sotobo'	].Cant.SetCenter(1067/2000);		Track['U-KY-Sotobo'	].Cant.SetFunction(1);
+
+	Track['D-Sazanami_Cr'].Cant.SetGauge(1067/1000);		Track['D-Sazanami_Cr'].Cant.SetCenter(1067/2000);		Track['D-Sazanami_Cr'].Cant.SetFunction(1);
+	Track['U-Sazanami_Cr'].Cant.SetGauge(1067/1000);		Track['U-Sazanami_Cr'].Cant.SetCenter(1067/2000);		Track['U-Sazanami_Cr'].Cant.SetFunction(1);
+
+
+
+#	!!!	・変数 を設定する構文
+#	!!!		$(任意の文字列) = (記憶させたい値/式)
+#	!!!
+#	!!!	変数名の先頭には $ を付けます. 変数を使用する前に上記方法にて変数宣言を行います.
+#	!!!	変数に代入できるのは, 数値・文字列のいずれかです. 文字列はクォーテーション ( ' ) でくくります.
+#	!!!	変数名に使用できる文字は, 英字(A～Z/a～z)・数字(0～9)・アンダースコアー( _ ) です.
+#	!!! 左辺と右辺の順を逆に記述することはできません.
+#	!!! 
+#	!!!	ex.	$BrMChiba	= 39440 ;
+#	!!!		・これで変数宣言は完了しています. 以降 $BrMChiba と入力すれば 39440 が代入されます.
+#	!!!		
+#	!!!		右辺に '変数宣言が済んだ変数'を使用することは可能です.
+#	!!! 	$WK01	= $BrMChiba -( 39205 ) ;
+#	!!! 					┗	$BrMChiba	= 39440 より, 39440 が代入されます.
+#	!!! 	よって, 上記構文は,
+#	!!!			$WK01	= 235;	と処理され, $WK01が定義されます.
+
+
+	$Inf	=	1000000000;							#	他列車や座標設定に使用
+
+#	[ キロ程用の変数定義 ]								#	実物のキロ程を マップ制作時のキロ程としてそのまま扱うために, 変数を使用しています.
+	$BrMChiba	= 39440 ;							#	この部分を調整することにより, Mapファイルのキロ程全体を調整することが可能です.
+	$SR01	= $BrMChiba ;							#	総武快速線のキロ程調整			/	$SR01 をキロ程に使う場合, 入力したキロ程 + 39440 がシナリオ上でのキロ程となります. 					(一律, +39440)
+	$WK01	= $BrMChiba -( 39205 ) ;				#	外房線起点地点でのキロ程の調整	/	$WK01 をキロ程に使う場合, 入力したキロ程 + 39440 - 39205 がシナリオ上でのキロ程となります. 			(一律, +  235)
+	$WK02	= $BrMChiba -( 39205 +380 ) ;			#	千葉駅東側でのキロ更生			/	$WK02 をキロ程に使う場合, 入力したキロ程 + 39440 - 39205 - 380 がシナリオ上でのキロ程となります. 		(一律, +  145)
+	$SZ01	= $BrMChiba -( 39205 +380 -4170 );		#	内房線起点でのキロ程の調整		/	$SZ01 をキロ程に使う場合, 入力したキロ程 + 39440 - 39205 - 380 +4170 がシナリオ上でのキロ程となります.	(一律, + 4025)
+
+
+
+#	[ 停止位置用の変数定義 ]							
+#	停止位置は自列車のみならず, 停車目標の設置, 他列車の停車位置など 複数回同じ値を使用することが考えられます.
+#	このようなとき(複数回同じ値を使用するとき)には, 変数名に規則性を持たせた変数を使用すると制作しやすいでしょう.
+												#	[ 千葉 ]		1番線：総武緩行線	/	2番線：総武緩行線
+													#				3番線：内房線		/	4番線：内房線
+													#				5番線：外房線		/	6番線：外房線
+	$Chiba1_stop10		=     5 + $WK01 ;			#	1番線/10両	/	  240;	に相当
+	$Chiba2_stop10		=     5 + $WK01 ;			#	2番線/10両	/	  240;	に相当
+
+	$Chiba3_stop4		=   -35 + $WK01 ;			#	3番線/ 4両	/	  200;	に相当
+	$Chiba3_stop5		=   -35 + $WK01 ;			#	3番線/ 5両	/	  200;	に相当
+	$Chiba3_stop6		=   -35 + $WK01 ;			#	3番線/ 6両	/	  200;	に相当
+	$Chiba3_stop8		=    15 + $WK01 ;			#	3番線/ 8両	/	  250;	に相当
+	$Chiba3_stop9		=    55 + $WK01 ;			#	3番線/ 9両	/	  290;	に相当
+	$Chiba3_stop10		=    55 + $WK01 ;			#	3番線/10両	/	  290;	に相当
+	$Chiba3_stop11		=    55 + $WK01 ;			#	3番線/11両	/	  290;	に相当
+	$Chiba3_stop15		=    55 + $WK01 ;			#	3番線/15両	/	  290;	に相当
+	$Chiba3_stopL10		=    25 + $WK01 ;			#	3番線/特10両	/	  260;	に相当
+
+	$Chiba4_stop6		=   -35 + $WK01 ;			#	4番線/ 6両	/	  200;	に相当
+	$Chiba4_stop8		=    15 + $WK01 ;			#	4番線/ 8両	/	  250;	に相当
+	$Chiba4_stop15		=    55 + $WK01 ;			#	4番線/15両	/	  290;	に相当
+	$Chiba4_stopL10		=    25 + $WK01 ;			#	4番線/特10両	/	  260;	に相当
+
+	$Chiba5_stop6		=   -35 + $WK01 ;			#	5番線/ 6両	/	  200;	に相当
+	$Chiba5_stop8		=    15 + $WK01 ;			#	5番線/ 8両	/	  250;	に相当
+	$Chiba5_stop15		=    55 + $WK01 ;			#	5番線/15両	/	  290;	に相当
+	$Chiba5_stopL10		=    25 + $WK01 ;			#	5番線/特10両	/	  260;	に相当
+
+	$Chiba6_stop6		=   -35 + $WK01 ;			#	6番線/ 6両	/	  200;	に相当
+	$Chiba6_stop8		=    15 + $WK01 ;			#	6番線/ 8両	/	  250;	に相当
+	$Chiba6_stop15		=    55 + $WK01 ;			#	6番線/15両	/	  290;	に相当
+	$Chiba6_stopL10		=    25 + $WK01 ;			#	6番線/特10両	/	  260;	に相当
+
+
+													#	[ 本千葉 ]	1番線：下り	/	2番線：上り
+	$HonChiba1_stop4	=  1900 + $WK02 ;			#	1番線/ 4両	/	 1755;	に相当
+	$HonChiba1_stop5	=  1900 + $WK02 ;			#	1番線/ 5両	/	 1755;	に相当
+	$HonChiba1_stop6	=  1900 + $WK02 ;			#	1番線/ 6両	/	 1755;	に相当
+	$HonChiba1_stop8	=  1940 + $WK02 ;			#	1番線/ 8両	/	 1795;	に相当
+	$HonChiba1_stop9	=  1960 + $WK02 ;			#	1番線/ 9両	/	 1815;	に相当
+	$HonChiba1_stop10	=  1960 + $WK02 ;			#	1番線/10両	/	 1815;	に相当
+	$HonChiba1_stop11	=  1970 + $WK02 ;			#	1番線/11両	/	 1825;	に相当
+	$HonChiba1_stop15 	=  2050 + $WK02 ;			#	1番線/15両	/	 1905;	に相当
+
+	$HonChiba2_stop4	=  1900 + $WK02 ;			#	2番線/ 4両	/	 1755;	に相当
+	$HonChiba2_stop5	=  1880 + $WK02 ;			#	2番線/ 5両	/	 1735;	に相当
+	$HonChiba2_stop6	=  1900 + $WK02 ;			#	2番線/ 6両	/	 1755;	に相当
+	$HonChiba2_stop8	=  1940 + $WK02 ;			#	2番線/ 8両	/	 1795;	に相当
+	$HonChiba2_stop9	=  1940 + $WK02 ;			#	2番線/ 9両	/	 1795;	に相当
+	$HonChiba2_stop10	=  1960 + $WK02 ;			#	2番線/10両	/	 1815;	に相当
+	$HonChiba2_stop11	=  1970 + $WK02 ;			#	2番線/11両	/	 1825;	に相当
+	$HonChiba2_stop15 	=  2050 + $WK02 ;			#	2番線/15両	/	 1905;	に相当
+
+
+													#	[ 蘇我 ]		1番線：内房線上り	/	2番線：外房線上り	/	3番線：京葉線
+													#				4番線：京葉線		/	5番線：内房線下り	/	6番線：外房線下り
+	$Soga1_stop4	=	 4204 + $WK02 ;			$Soga2_stop4	=	 4204 + $WK02 ;			$Soga3_stop4	=	 4204 + $WK02 ;			
+	$Soga1_stop5	=	 4204 + $WK02 ;			$Soga2_stop5	=	 4204 + $WK02 ;			$Soga3_stop5	=	 4204 + $WK02 ;			
+	$Soga1_stop6	=	 4204 + $WK02 ;			$Soga2_stop6	=	 4204 + $WK02 ;			$Soga3_stop6	=	 4204 + $WK02 ;			
+	$Soga1_stop8	=	 4204 + $WK02 ;			$Soga2_stop8	=	 4204 + $WK02 ;			$Soga3_stop8	=	 4204 + $WK02 ;			
+	$Soga1_stop9	=	 4184 + $WK02 ;			$Soga2_stop9	=	 4184 + $WK02 ;			$Soga3_stop9	=	 4204 + $WK02 ;			
+	$Soga1_stop10	=	 4204 + $WK02 ;			$Soga2_stop10	=	 4204 + $WK02 ;			$Soga3_stop10	=	 4204 + $WK02 ;			
+	$Soga1_stop11	=	 4210 + $WK02 ;			$Soga2_stop11	=	 4210 + $WK02 ;			$Soga3_stop11	=	 4210 + $WK02 ;			
+	$Soga1_stop15	=	 4210 + $WK02 ;			$Soga2_stop15	=	 4210 + $WK02 ;			$Soga3_stop15	=	 4210 + $WK02 ;
+
+	$Soga4_stop4	=	 4204 + $WK02 ;			$Soga5_stop4	=	 4204 + $WK02 ;			$Soga6_stop4	=	 4204 + $WK02 ;
+	$Soga4_stop5	=	 4204 + $WK02 ;			$Soga5_stop5	=	 4204 + $WK02 ;			$Soga6_stop5	=	 4204 + $WK02 ;
+	$Soga4_stop6	=	 4204 + $WK02 ;			$Soga5_stop6	=	 4204 + $WK02 ;			$Soga6_stop6	=	 4204 + $WK02 ;
+	$Soga4_stop8	=	 4204 + $WK02 ;			$Soga5_stop8	=	 4204 + $WK02 ;			$Soga6_stop8	=	 4204 + $WK02 ;
+	$Soga4_stop9	=	 4204 + $WK02 ;			$Soga5_stop9	=	 4244 + $WK02 ;			$Soga6_stop9	=	 4244 + $WK02 ;
+	$Soga4_stop10	=	 4204 + $WK02 ;			$Soga5_stop10	=	 4244 + $WK02 ;			$Soga6_stop10	=	 4244 + $WK02 ;
+	$Soga4_stop11	=	 4264 + $WK02 ;			$Soga5_stop11	=	 4264 + $WK02 ;			$Soga6_stop11	=	 4264 + $WK02 ;
+	$Soga4_stop15	=	 4264 + $WK02 ;			$Soga5_stop15	=	 4264 + $WK02 ;			$Soga6_stop15	=	 4264 + $WK02 ;
+	$Soga4_stopL8	=	 4204 + $WK02 ;			$Soga5_stopL8	=	 4204 + $WK02 ;			$Soga6_stopL8	=	 4204 + $WK02 ;
+	$Soga4_stopL9	=	 4204 + $WK02 ;			$Soga5_stopL9	=	 4204 + $WK02 ;			$Soga6_stopL9	=	 4244 + $WK02 ;
+	$Soga4_stopL10	=	 4204 + $WK02 ;			$Soga5_stopL10	=	 4250 + $WK02 ;			$Soga6_stopL10	=	 4250 + $WK02 ;
+
+													#	[ 浜野 ]	1番線：上り	/	2番線：下り
+	$Hamano1_stop4		=	 3430 + $SZ01 ;			#	1番線/ 4両	/	 7455;	に相当
+	$Hamano1_stop5		=	 3430 + $SZ01 ;			#	1番線/ 5両	/	 7455;	に相当
+	$Hamano1_stop6		=	 3450 + $SZ01 ;			#	1番線/ 6両	/	 7475;	に相当
+	$Hamano1_stop8		=	 3470 + $SZ01 ;			#	1番線/ 8両	/	 7495;	に相当
+	$Hamano1_stop9		=	 3490 + $SZ01 ;			#	1番線/ 9両	/	 7515;	に相当
+	$Hamano1_stop10		=	 3510 + $SZ01 ;			#	1番線/10両	/	 7535;	に相当
+	$Hamano1_stop11		=	 3530 + $SZ01 ;			#	1番線/11両	/	 7555;	に相当
+	$Hamano1_stop15		=	 3530 + $SZ01 ;			#	1番線/15両	/	 7555;	に相当
+
+	$Hamano2_stop4		=	 3430 + $SZ01 ;			#	2番線/ 4両	/	 7455;	に相当
+	$Hamano2_stop5		=	 3430 + $SZ01 ;			#	2番線/ 5両	/	 7455;	に相当
+	$Hamano2_stop6		=	 3430 + $SZ01 ;			#	2番線/ 6両	/	 7455;	に相当
+	$Hamano2_stop8		=	 3470 + $SZ01 ;			#	2番線/ 8両	/	 7495;	に相当
+	$Hamano2_stop9		=	 3510 + $SZ01 ;			#	2番線/ 9両	/	 7535;	に相当
+	$Hamano2_stop10		=	 3510 + $SZ01 ;			#	2番線/10両	/	 7535;	に相当
+	$Hamano2_stop11		=	 3530 + $SZ01 ;			#	2番線/11両	/	 7555;	に相当
+	$Hamano2_stop15		=	 3530 + $SZ01 ;			#	2番線/15両	/	 7555;	に相当
+
+
+													#	[ 八幡宿 ]	1番線：上り	/	2番線：下り
+	$Yawata1_stop4		=	 5525 + $SZ01 ;			#	1番線/ 4両	/	 9550;	に相当
+	$Yawata1_stop5		=	 5545 + $SZ01 ;			#	1番線/ 5両	/	 9570;	に相当
+	$Yawata1_stop6		=	 5565 + $SZ01 ;			#	1番線/ 6両	/	 9590;	に相当
+	$Yawata1_stop8		=	 5605 + $SZ01 ;			#	1番線/ 8両	/	 9630;	に相当
+	$Yawata1_stop9		=	 5625 + $SZ01 ;			#	1番線/ 9両	/	 9650;	に相当
+	$Yawata1_stop10		=	 5645 + $SZ01 ;			#	1番線/10両	/	 9670;	に相当
+	$Yawata1_stop11		=	 5665 + $SZ01 ;			#	1番線/11両	/	 9690;	に相当
+	$Yawata1_stop15		=	 5665 + $SZ01 ;			#	1番線/15両	/	 9690;	に相当
+
+	$Yawata2_stop4		=	 5525 + $SZ01 ;			#	2番線/ 4両	/	 9550;	に相当
+	$Yawata2_stop5		=	 5565 + $SZ01 ;			#	2番線/ 5両	/	 9590;	に相当
+	$Yawata2_stop6		=	 5565 + $SZ01 ;			#	2番線/ 6両	/	 9590;	に相当
+	$Yawata2_stop8		=	 5565 + $SZ01 ;			#	2番線/ 8両	/	 9590;	に相当
+	$Yawata2_stop9		=	 5645 + $SZ01 ;			#	2番線/ 9両	/	 9670;	に相当
+	$Yawata2_stop10		=	 5645 + $SZ01 ;			#	2番線/10両	/	 9670;	に相当
+	$Yawata2_stop11		=	 5665 + $SZ01 ;			#	2番線/11両	/	 9690;	に相当
+	$Yawata2_stop15		=	 5665 + $SZ01 ;			#	2番線/154両	/	 9690;	に相当
+
+
+													#	[ 五井 ]	1番線：上り	/	2番線：下り
+	$Goi1_stop4			=	 9285 + $SZ01 ;			#	1番線/ 4両	/	13310;	に相当
+	$Goi1_stop5			=	 9305 + $SZ01 ;			#	1番線/ 5両	/	13330;	に相当
+	$Goi1_stop6			=	 9325 + $SZ01 ;			#	1番線/ 6両	/	13350;	に相当
+	$Goi1_stop8			=	 9365 + $SZ01 ;			#	1番線/ 8両	/	13390;	に相当
+	$Goi1_stop9			=	 9385 + $SZ01 ;			#	1番線/ 9両	/	13410;	に相当
+	$Goi1_stop10		=	 9405 + $SZ01 ;			#	1番線/10両	/	13430;	に相当
+	$Goi1_stop11		=	 9425 + $SZ01 ;			#	1番線/11両	/	13450;	に相当
+	$Goi1_stop15		=	 9438 + $SZ01 ;			#	1番線/15両	/	13463;	に相当
+
+	$Goi2_stop4			=	 9291 + $SZ01 ;			#	2番線/ 4両	/	13316;	に相当
+	$Goi2_stop5			=	 9331 + $SZ01 ;			#	2番線/ 5両	/	13356;	に相当
+	$Goi2_stop6			=	 9331 + $SZ01 ;			#	2番線/ 6両	/	13356;	に相当
+	$Goi2_stop8			=	 9331 + $SZ01 ;			#	2番線/ 8両	/	13356;	に相当
+	$Goi2_stop9			=	 9371 + $SZ01 ;			#	2番線/ 9両	/	13396;	に相当
+	$Goi2_stop10		=	 9371 + $SZ01 ;			#	2番線/10両	/	13396;	に相当
+	$Goi2_stop11		=	 9438 + $SZ01 ;			#	2番線/11両	/	13463;	に相当
+	$Goi2_stop15		=	 9438 + $SZ01 ;			#	2番線/15両	/	13463;	に相当
+
+
+													#	[ 姉ヶ崎 ]	1番線：上り	/	2番線：下り
+	$Anegasaki1_stop4	=	15200 + $SZ01 ;			#	1番線/ 4両	/	19225;	に相当
+	$Anegasaki1_stop5	=	15200 + $SZ01 ;			#	1番線/ 5両	/	19225;	に相当
+	$Anegasaki1_stop6	=	15200 + $SZ01 ;			#	1番線/ 6両	/	19225;	に相当
+	$Anegasaki1_stop8	=	15200 + $SZ01 ;			#	1番線/ 8両	/	19225;	に相当
+	$Anegasaki1_stop9	=	15200 + $SZ01 ;			#	1番線/ 9両	/	19225;	に相当
+	$Anegasaki1_stop10	=	15200 + $SZ01 ;			#	1番線/10両	/	19225;	に相当
+	$Anegasaki1_stop11	=	15200 + $SZ01 ;			#	1番線/11両	/	19225;	に相当
+	$Anegasaki1_stop15	=	15200 + $SZ01 ;			#	1番線/15両	/	19225;	に相当
+
+
+
+
+
+
